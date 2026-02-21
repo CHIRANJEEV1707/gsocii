@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
       prisma.user.count(),
       prisma.user.count({ where: { referredBy: { not: null } } }),
       prisma.order.groupBy({
-        by: ['bundleId'],
+        by: ['bundleId'] as const,
         where: { status: 'paid' },
         _count: { id: true },
+        orderBy: { bundleId: 'asc' }
       })
     ])
 
