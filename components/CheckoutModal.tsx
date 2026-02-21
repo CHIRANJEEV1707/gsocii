@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, ChevronRight, CreditCard, QrCode, Loader2 } from "lucide-react"
+import { X, ChevronRight, QrCode, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface CheckoutModalProps {
@@ -30,69 +30,7 @@ export default function CheckoutModal({ bundle, onClose }: CheckoutModalProps) {
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setStep(2)
-  }
-
-  const initializeRazorpay = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script")
-      script.src = "https://checkout.razorpay.com/v1/checkout.js"
-      script.onload = () => resolve(true)
-      script.onerror = () => resolve(false)
-      document.body.appendChild(script)
-    })
-  }
-
-  const handleRazorpayPayment = async () => {
-    setLoading(true)
-    const res = await initializeRazorpay()
-
-    if (!res) {
-      alert("Razorpay SDK failed to load. Check your internet connection.")
-      setLoading(false)
-      return
-    }
-
-    try {
-      const data = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bundleId: bundle.id,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-        }),
-      }).then((t) => t.json())
-
-      if (data.error) throw new Error(data.error)
-
-      const options = {
-        key: data.key,
-        amount: data.amount,
-        currency: data.currency,
-        name: "Revamp Workshops",
-        description: bundle.name,
-        order_id: data.orderId,
-        handler: function (response: any) {
-          router.push("/success")
-        },
-        prefill: {
-          name: formData.name,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        theme: { color: "#ea580c" },
-      }
-
-      const paymentObject = new (window as any).Razorpay(options)
-      paymentObject.open()
-      onClose()
-    } catch (err: any) {
-      alert(err.message || "Payment initialization failed")
-    } finally {
-      setLoading(false)
-    }
+    setStep(3) // Skip step 2 (method selection) and go directly to QR
   }
 
   const handleQRSubmission = async (e: React.FormEvent) => {
@@ -181,38 +119,6 @@ export default function CheckoutModal({ bundle, onClose }: CheckoutModalProps) {
             </form>
           )}
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <button
-                onClick={handleRazorpayPayment}
-                disabled={loading}
-                className="w-full flex items-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-left"
-              >
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center mr-4 text-blue-500">
-                  <CreditCard className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold">Pay via Razorpay</h4>
-                  <p className="text-xs text-gray-500">UPI, Cards, Netbanking</p>
-                </div>
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5 text-gray-500" />}
-              </button>
-
-              <button
-                onClick={() => setStep(3)}
-                className="w-full flex items-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-left"
-              >
-                <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center mr-4 text-green-500">
-                  <QrCode className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold">Manual QR Payment</h4>
-                  <p className="text-xs text-gray-500">Scan & Upload Transaction ID</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-          )}
 
           {step === 3 && (
             <form onSubmit={handleQRSubmission} className="space-y-6">
@@ -250,7 +156,7 @@ export default function CheckoutModal({ bundle, onClose }: CheckoutModalProps) {
               <div className="flex space-x-3">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(1)}
                   className="flex-1 px-6 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all"
                 >
                   Back
