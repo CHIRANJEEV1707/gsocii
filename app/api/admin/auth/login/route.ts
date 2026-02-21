@@ -13,13 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify credentials directly from env
-    if (email !== env.ADMIN_EMAIL) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
-    }
-
-    const passwordMatch = await bcrypt.compare(password, env.ADMIN_PASSWORD_HASH)
-
-    if (!passwordMatch) {
+    if (email !== env.ADMIN_EMAIL || password !== env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
