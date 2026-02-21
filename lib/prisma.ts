@@ -2,13 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { env } from './env'
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({
-    datasources: {
+  const options: any = {}
+
+  if (env.DATABASE_URL) {
+    options.datasources = {
       db: {
         url: env.DATABASE_URL
       }
     }
-  })
+  }
+
+  return new PrismaClient(options)
 }
 
 declare global {
