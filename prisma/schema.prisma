@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  phone           String
+  passwordHash    String?
+  referralCode    String   @unique
+  referredBy      String?
+  totalReferrals  Int      @default(0)
+  createdAt       DateTime @default(now())
+  
+  orders          Order[]
+
+  @@index([referralCode])
+}
+
+model Bundle {
+  id            String   @id @default(uuid())
+  name          String
+  originalPrice Float
+  eventPrice    Float
+  isDiscounted  Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  orders        Order[]
+}
+
+model Order {
+  id                  String   @id @default(uuid())
+  userId              String
+  bundleId            String
+  razorpayPaymentId   String?
+  amount              Float
+  paymentMethod       String   // razorpay | qr
+  status              String   @default("pending") // pending | paid | failed
+  createdAt           DateTime @default(now())
+
+  user                User     @relation(fields: [userId], references: [id])
+  bundle              Bundle   @relation(fields: [bundleId], references: [id])
+
+  @@index([userId])
+  @@index([bundleId])
+}
+
+model ReferralClick {
+  id            String   @id @default(uuid())
+  referralCode  String
+  visitorIp     String
+  createdAt     DateTime @default(now())
+
+  @@index([referralCode])
+}
