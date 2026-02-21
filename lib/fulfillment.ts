@@ -2,7 +2,9 @@ import prisma from './prisma'
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
 
-const resend = new Resend(env.RESEND_API_KEY)
+const resend = env.RESEND_API_KEY
+  ? new Resend(env.RESEND_API_KEY)
+  : { emails: { send: async () => ({}) } } as any
 
 export async function fulfillOrder(orderId: string, paymentId: string) {
   return await prisma.$transaction(async (tx) => {

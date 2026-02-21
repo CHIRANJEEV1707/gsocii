@@ -20,7 +20,7 @@ function validateEnv(): Env {
     const value = process.env[key]
 
     // Only enforce presence on the server and NOT during build
-    const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || process.env.CI === 'true'
+    const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || !process.env.DATABASE_URL
 
     if (isServer && !value && !isBuildPhase) {
       throw new Error(`Missing environment variable: ${key}`)

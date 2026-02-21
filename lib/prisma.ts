@@ -10,6 +10,14 @@ const prismaClientSingleton = () => {
         url: env.DATABASE_URL
       }
     }
+  } else {
+    // Provide a dummy URL during Vercel build phase to prevent Prisma from crashing
+    // when Next.js tries to collect page data/traces for dynamic routes.
+    options.datasources = {
+      db: {
+        url: "postgresql://dummy:dummy@localhost:5432/postgres"
+      }
+    }
   }
 
   return new PrismaClient(options)
