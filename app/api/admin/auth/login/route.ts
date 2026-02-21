@@ -4,6 +4,8 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { env } from "@/lib/env"
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()

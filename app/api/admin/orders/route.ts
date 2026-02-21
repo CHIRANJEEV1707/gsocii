@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma'
 import { adminAuth, unauthorizedResponse } from '@/lib/admin-auth'
 import { fulfillOrder } from '@/lib/fulfillment'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const admin = await adminAuth(req)
   if (!admin) return unauthorizedResponse()
